@@ -3,9 +3,151 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="styles.css" />
-    <title>Puissance4</title>
+    <title>Puissance 4</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+
+      .board {
+        display: grid;
+        grid-template-columns: repeat(7, 80px);
+        gap: 5px;
+        margin-top: 20px;
+      }
+
+      .cell {
+        width: 80px;
+        height: 80px;
+        border: 2px solid #333;
+        cursor: pointer;
+      }
+    </style>
   </head>
-  <body></body>
-  <script src="index.js"></script>
+  <body>
+    <h1>Puissance 4</h1>
+    <div id="board" class="board"></div>
+
+    <script>
+      const rows = 6
+      const cols = 7
+      let currentPlayer = 1
+      let board = []
+
+      function initializeBoard() {
+        for (let row = 0; row < rows; row++) {
+          board[row] = []
+          for (let col = 0; col < cols; col++) {
+            board[row][col] = 0
+          }
+        }
+      }
+
+      function renderBoard() {
+        const boardElement = document.getElementById('board')
+        boardElement.innerHTML = ''
+
+        for (let row = 0; row < rows; row++) {
+          for (let col = 0; col < cols; col++) {
+            const cell = document.createElement('div')
+            cell.className = 'cell'
+            cell.dataset.row = row
+            cell.dataset.col = col
+            cell.addEventListener('click', handleCellClick)
+            if (board[row][col] === 1) {
+              cell.style.backgroundColor = 'red'
+            } else if (board[row][col] === 2) {
+              cell.style.backgroundColor = 'yellow'
+            }
+            boardElement.appendChild(cell)
+          }
+        }
+      }
+
+      function handleCellClick(event) {
+        const clickedRow = parseInt(event.target.dataset.row)
+        const clickedCol = parseInt(event.target.dataset.col)
+
+        for (let row = rows - 1; row >= 0; row--) {
+          if (board[row][clickedCol] === 0) {
+            board[row][clickedCol] = currentPlayer
+            renderBoard()
+            if (checkForWin(row, clickedCol)) {
+              alert(`Player ${currentPlayer} wins!`)
+              initializeBoard()
+              renderBoard()
+              return
+            }
+            switchPlayer()
+            return
+          }
+        }
+      }
+
+      function switchPlayer() {
+        currentPlayer = currentPlayer === 1 ? 2 : 1
+      }
+
+      function checkForWin(row, col) {
+        // Check horizontally
+        if (
+          checkLine(row, col, 0, 1) ||
+          // Check vertically
+          checkLine(row, col, 1, 0) ||
+          // Check diagonally (top-left to bottom-right)
+          checkLine(row, col, 1, 1) ||
+          // Check diagonally (top-right to bottom-left)
+          checkLine(row, col, 1, -1)
+        ) {
+          return true
+        }
+        return false
+      }
+
+      function checkLine(row, col, rowIncrement, colIncrement) {
+        const player = board[row][col]
+        let count = 1
+
+        // Check in one direction
+        for (let i = 1; i < 4; i++) {
+          const newRow = row + i * rowIncrement
+          const newCol = col + i * colIncrement
+          if (
+            newRow >= 0 &&
+            newRow < rows &&
+            newCol >= 0 &&
+            newCol < cols &&
+            board[newRow][newCol] === player
+          ) {
+            count++
+          } else {
+            break
+          }
+        }
+
+        // Check in the opposite direction
+        for (let i = 1; i < 4; i++) {
+          const newRow = row - i * rowIncrement
+          const newCol = col - i * colIncrement
+          if (
+            newRow >= 0 &&
+            newRow < rows &&
+            newCol >= 0 &&
+            newCol < cols &&
+            board[newRow][newCol] === player
+          ) {
+            count++
+          } else {
+            break
+          }
+        }
+
+        return count >= 4
+      }
+
+      initializeBoard()
+      renderBoard()
+    </script>
+  </body>
 </html>
